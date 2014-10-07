@@ -18,5 +18,5 @@ Running time is `O(|V| + log(|V|)*|E|)`.
 
 Example:
 
-`?- nodes_arcs_sccs([a,b,c,d], [arc(a,b),arc(b,a),arc(b,c)], SCCs).
- SCCs = [[a,b],[c],[d]].`
+```?- nodes_arcs_sccs([a,b,c,d], [arc(a,b),arc(b,a),arc(b,c)], SCCs).
+   SCCs = [[a,b],[c],[d]].```
