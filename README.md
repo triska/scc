@@ -5,7 +5,7 @@ using Tarjan's algorithm.
 
 Usage:
 
-    `nodes_arcs_sccs(+Ns, +As, -SCCs)`
+    nodes_arcs_sccs(+Ns, +As, -SCCs)
 
 where:
 
