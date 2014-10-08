@@ -1,7 +1,6 @@
 
 
-Compute the Strongly Connected Components of a Graph,
-using Tarjan's algorithm.
+Relation between a graph and its Strongly Connected Components (SCCs).
 
 Usage:
 
