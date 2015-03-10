@@ -142,7 +142,7 @@ each_edge([VP|VPs], V) -->
 v_in_stack(V) --> { get_attr(V, in_stack, true) }.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-   DCG rules to access the state, using right-hand context notation.
+   DCG rules to access the state, using semicontext notation.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 state(S), [S] --> [S].
