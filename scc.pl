@@ -15,7 +15,7 @@
    where:
 
    Ns is a list of nodes. Each node must be a ground term.
-   As is a list of arc(N1,N2) terms where N1 and N2 are nodes.
+   As is a list of arc(From,To) terms where From and To are nodes.
    SCCs is a list of lists of nodes that are in the same strongly
         connected component.
 
