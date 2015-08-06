@@ -1,6 +1,6 @@
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Strongly connected components of a graph.
-   Written by Markus Triska (triska@gmx.at), May 2011
+   Written by Markus Triska (triska@gmx.at), 2011, 2015
    Public domain code.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
