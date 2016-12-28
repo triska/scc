@@ -1,6 +1,6 @@
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Strongly connected components of a graph.
-   Written by Markus Triska (triska@gmx.at), 2011, 2015
+   Written by Markus Triska (triska@metalevel.at), 2011, 2015, 2016
    Public domain code.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -29,6 +29,7 @@
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 :- use_module(library(assoc)).
+:- use_module(library(clpfd)).
 
 nodes_arcs_sccs(Ns, As, Ss) :-
         must_be(list(ground), Ns),
@@ -105,7 +106,7 @@ vlowlink_is_index(V) -->
 
 index_plus_one -->
         state(s(I,Stack,Succ), s(I1,Stack,Succ)),
-        { I1 is I+1 }.
+        { I1 #= I+1 }.
 
 s_push(V)  -->
         state(s(I,Stack,Succ), s(I,[V|Stack],Succ)),
@@ -114,7 +115,7 @@ s_push(V)  -->
 vlowlink_min_lowlink(V, VP) -->
         { get_attr(V, lowlink, VL),
           get_attr(VP, lowlink, VPL),
-          VL1 is min(VL, VPL),
+          VL1 #= min(VL, VPL),
           put_attr(V, lowlink, VL1) }.
 
 successors(V, Tos) --> state(s(_,_,Succ)), { call(Succ, V, Tos) }.
@@ -143,6 +144,11 @@ v_in_stack(V) --> { get_attr(V, in_stack, true) }.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    DCG rules to access the state, using semicontext notation.
+
+   How it works is explained in the DCG primer:
+
+                 https://www.metalevel.at/prolog/dcg
+                 ===================================
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 state(S), [S] --> [S].
