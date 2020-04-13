@@ -1,10 +1,24 @@
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Strongly connected components of a graph.
-   Written by Markus Triska (triska@metalevel.at), 2011, 2015, 2016
-   Public domain code.
+   Written by Markus Triska (triska@metalevel.at), 2011, 2015, 2016, 2020
+   Public domain code. Tested with Scryer Prolog.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 :- module(scc, [nodes_arcs_sccs/3]).
+
+:- use_module(library(atts)).
+:- use_module(library(clpz)).
+:- use_module(library(assoc)).
+:- use_module(library(error)).
+:- use_module(library(pairs)).
+:- use_module(library(dcgs)).
+
+:- attribute
+        lowlink/1,
+        node/1,
+        successors/1,
+        index/1,
+        in_stack/1.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -28,12 +42,9 @@
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-:- use_module(library(assoc)).
-:- use_module(library(clpfd)).
-
 nodes_arcs_sccs(Ns, As, Ss) :-
-        must_be(list(ground), Ns),
-        must_be(list(ground), As),
+        must_be(list, Ns),
+        must_be(list, As),
         catch((maplist(node_var_pair, Ns, Vs, Ps),
                list_to_assoc(Ps, Assoc),
                maplist(attach_arc(Assoc), As),
@@ -50,14 +61,14 @@ nodes_arcs_sccs(Ns, As, Ss) :-
 % Associate a fresh variable with each node, so that attributes can be
 % attached to variables that correspond to nodes.
 
-node_var_pair(N, V, N-V) :- put_attr(V, node, N).
+node_var_pair(N, V, N-V) :- put_atts(V, node(N)).
 
 v_with_lowlink(V, L-N) :-
-        get_attr(V, lowlink, L),
-        get_attr(V, node, N).
+        get_atts(V, lowlink(L)),
+        get_atts(V, node(N)).
 
 successors(V, Vs) :-
-        (   get_attr(V, successors, Vs) -> true
+        (   get_atts(V, successors(Vs)) -> true
         ;   Vs = []
         ).
 
@@ -65,7 +76,7 @@ attach_arc(Assoc, arc(X,Y)) :-
         get_assoc(X, Assoc, VX),
         get_assoc(Y, Assoc, VY),
         successors(VX, Vs),
-        put_attr(VX, successors, [VY|Vs]).
+        put_atts(VX, successors([VY|Vs])).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    Tarjan's strongly connected components algorithm.
@@ -89,20 +100,20 @@ scc_(V) -->
         s_push(V),
         successors(V, Tos),
         each_edge(Tos, V),
-        (   { get_attr(V, index, VI),
-              get_attr(V, lowlink, VI) } -> pop_stack_to(V, VI)
+        (   { get_atts(V, index(VI)),
+              get_atts(V, lowlink(VI)) } -> pop_stack_to(V, VI)
         ;   []
         ).
 
-vindex_defined(V) --> { get_attr(V, index, _) }.
+vindex_defined(V) --> { get_atts(V, index(_)) }.
 
 vindex_is_index(V) -->
         state(s(Index,_,_)),
-        { put_attr(V, index, Index) }.
+        { put_atts(V, index(Index)) }.
 
 vlowlink_is_index(V) -->
         state(s(Index,_,_)),
-        { put_attr(V, lowlink, Index) }.
+        { put_atts(V, lowlink(Index)) }.
 
 index_plus_one -->
         state(s(I,Stack,Succ), s(I1,Stack,Succ)),
@@ -110,21 +121,21 @@ index_plus_one -->
 
 s_push(V)  -->
         state(s(I,Stack,Succ), s(I,[V|Stack],Succ)),
-        { put_attr(V, in_stack, true) }.
+        { put_atts(V, in_stack(true)) }.
 
 vlowlink_min_lowlink(V, VP) -->
-        { get_attr(V, lowlink, VL),
-          get_attr(VP, lowlink, VPL),
+        { get_atts(V, lowlink(VL)),
+          get_atts(VP, lowlink(VPL)),
           VL1 #= min(VL, VPL),
-          put_attr(V, lowlink, VL1) }.
+          put_atts(V, lowlink(VL1)) }.
 
 successors(V, Tos) --> state(s(_,_,Succ)), { call(Succ, V, Tos) }.
 
 pop_stack_to(V, N) -->
         state(s(I,[First|Stack],Succ), s(I,Stack,Succ)),
-        { del_attr(First, in_stack) },
+        { put_atts(First, -in_stack(_)) },
         (   { First == V } -> []
-        ;   { put_attr(First, lowlink, N) },
+        ;   { put_atts(First, lowlink(N)) },
             pop_stack_to(V, N)
         ).
 
@@ -140,7 +151,7 @@ each_edge([VP|VPs], V) -->
         ),
         each_edge(VPs, V).
 
-v_in_stack(V) --> { get_attr(V, in_stack, true) }.
+v_in_stack(V) --> { get_atts(V, in_stack(true)) }.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
    DCG rules to access the state, using semicontext notation.
